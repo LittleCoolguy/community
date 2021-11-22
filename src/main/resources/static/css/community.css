@@ -1,0 +1,206 @@
+body {
+    background-color: #efefef;
+}
+
+.main {
+    background-color: #FFFFFF;
+    margin: 60px;
+    width: 70%;
+    margin: auto;
+    opacity: 0.86;
+}
+
+.sidex {
+    margin: 5px 0;
+}
+
+.btn-publish {
+    float: right;
+    margin-bottom: 15px;
+}
+
+.media-object {
+    margin-top: 6px;
+    width: 38px;
+    height: 38px;
+}
+
+.media-body {
+    padding-top: 10px;
+}
+
+.text-desc {
+    font-size: 12px;
+    font-weight: normal;
+    color: #999;
+}
+
+.profile .section {
+    margin-top: 15px;
+}
+
+.question-title {
+    margin-top: 25px;
+}
+
+.question-tag {
+    margin-right: 5px;
+}
+
+.question-related {
+    line-height: 20px;
+    font-size: 12px;
+    margin-left: 0;
+    list-style: none;
+    padding-left: 0;
+}
+
+.question-wechat {
+    width: 95%;
+}
+
+.publish-tag-tab {
+    display: none;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+.publish-tag-tab .label-info {
+    white-space: normal;
+    margin: 5px 5px;
+    display: inline-block;
+}
+
+.community-menu {
+    color: #999;
+    font-size: 13px;
+    margin-bottom: 15px;
+}
+
+.jumbotron {
+    margin: 50px;
+}
+
+.comment {
+    margin: 10px 0;
+}
+
+.btn-comment {
+    float: right;
+    margin-bottom: 10px;
+}
+
+.comments {
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.sub-comments {
+    border-radius: 5px;
+    margin-top: 10px;
+    border: 1px solid #eee;
+    padding-top: 15px;
+    margin-bottom: 15px;
+}
+
+.sub-comments .btn {
+    margin: 10px 0;
+}
+
+.comment-sp {
+    margin-top: 0;
+}
+
+.menu {
+    color: #999;
+    margin-top: 5px;
+}
+
+.menu .icon {
+    margin-right: 6px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.menu .comment-icon {
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.menu .comment-icon :hover {
+    color: #499ef3;
+}
+
+.menu .active {
+    color: #499ef3;
+}
+
+.menu .icon:hover {
+    color: #499ef3;
+}
+
+.footer {
+    text-align: center;
+    color: #666;;
+}
+
+.red {
+    color: #ff0000;
+}
+
+.community-tag {
+    text-decoration-line: none;
+    cursor: pointer;
+    display: inline-block;
+    height: 20px;
+    line-height: 16px;
+    padding: 2px 5px;
+    background-color: #99cfff;
+    font-size: 12px;
+    color: #fff !important;
+    border-radius: 4px;
+    margin: 4px;
+}
+
+.report {
+    background-image: url(/images/report.jpg);
+    background-repeat: no-repeat;
+    background-size:100% 100%;
+}
+
+.report-box {
+    margin: -75px auto 0;
+    width: 986px;
+    height: 600px;
+    border: 7px solid #ebebeb;
+    z-index: 2;
+    background-color: #FFFFFF;
+    font-family: "微软雅黑";
+    position: relative;
+}
+
+.report-title {
+    padding-left: 48px;
+    height: 76px;
+    border-bottom: 1px solid #ebebeb;
+    line-height: 76px;
+}
+
+svg {
+    width: 130px;
+    height: 130px;
+    display: block;
+    margin: auto auto 50px;
+}
+
+.liked {
+    color: #499ef3;
+}
+
+#live2dcanvas {
+    border: 0 !important;
+}
+
+
+

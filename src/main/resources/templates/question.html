@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${question.title}"></title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/community.css">
+    <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/css/editormd.min.css">
+    <link rel="stylesheet" href="/css/editormd.preview.min.css">
+
+    <script src="/js/jquery-3.4.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/community.js"></script>
+    <script src="/js/editormd.min.js" type="application/javascript"></script>
+    <script src="/js/lib/marked.min.js"></script>
+    <script src="/js/lib/prettify.min.js"></script>
+
+    <link href="/css/bootsnav.css" rel="stylesheet">
+    <link href="/css/color.css" rel="stylesheet">
+    <script src="/js/bootsnav.js"></script>
+    <script>
+        /**
+         * 页面加载时查询用户是否收藏和举报过此问题
+         */
+        $(function(){
+            console.log($("#test").attr("data-id"))
+            var url = window.location.pathname;
+            var questionId = url.substring(url.lastIndexOf('/') + 1, url.length);
+            $.ajax({
+                type : "GET",
+                url : "/isCollect",
+                data : {
+                    "questionId" : questionId
+                },
+                success: function (msg) {
+                    console.log(msg)
+                    if (msg.code == 200) {
+                        $('#btn1').text("已收藏");
+                        $('#btn1').attr("disabled", "disabled");
+                    }
+                }
+            })
+            $.ajax({
+                type : "GET",
+                url : "/isReport",
+                data : {
+                    "questionId" : questionId
+                },
+                success: function (msg) {
+                    console.log(msg)
+                    if (msg.code == 200) {
+                        $('#btn2').text("已举报");
+                        $('#btn2').attr("disabled", "disabled");
+                    }
+                }
+            })
+        });
+    </script>
+</head>
+<body>
+<div th:insert="~{navigation :: nav}"></div>
+
+<div class="container-fluid main profile" style="border-radius:10px; margin-top: 20px; box-shadow:0px 0px 16px 5px #ccc; ">
+    <div class="row">
+        <div class="col-lg-8 col-md-12 col-sm-12 col-xs-12" style="margin: 10px;">
+            <h4><span th:text="${question.title}"></span></h4>
+            <span class="text-desc">
+                作者：<span th:text="${question.user.name}"></span> |
+                发布时间：<span th:text="${#dates.format(question.gmtCreate,'yyyy-MM-dd HH:mm')}"></span> |
+                阅读数： <span th:text="${question.viewCount}"></span>
+            </span>
+            <span style="margin-left: 40%;" th:if="${session.user == null}">
+                <button type="button" class="btn btn-info"  disabled="disabled">收藏</button>
+                <button type="button" class="btn btn-danger"  disabled="disabled">举报</button>
+            </span>
+            <span style="margin-left: 30%;" th:if="${session.user != null}">
+                <button type="button" class="btn btn-info" id="btn1" th:value="${question.id}" onclick="collection(this)">收藏</button>
+                <a th:href="@{'/report/'+${question.id}}" target="_blank"><button type="button" class="btn btn-danger" id="btn2" th:value="${question.id}">举报</button></a>
+            </span>
+            <span style="margin-left: 30%;" th:if="${session.user != null && session.user.id == 20}">
+                <button class="btn btn-outline-danger" th:attr="btn_id = ${question.id}" onclick="deleteReport(this)">删除</button>
+                <button class="btn btn-outline-danger" th:attr="btn_id = ${question.id}" onclick="addChoice(this)">加精</button>
+            </span>
+            <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <!--标签-->
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <span class="label label-info question-tag" th:each="tag : ${question.tag.split(',')}">
+                        <span class="glyphicon glyphicon-tags"></span>
+                        <span class="label label-info" th:text="${tag}"></span>
+                    </span>
+            </div>
+            <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+            <!--内容-->
+
+            <script type="text/javascript">
+                $(function () {
+                    editormd.markdownToHTML("question-view", {});
+                });
+            </script>
+
+            <!--内容-->
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="question-view">
+                <textarea style="display:none;" th:text="${question.description}"></textarea>
+            </div>
+            <script type="text/javascript">
+                $(function () {
+                    editormd.markdownToHTML("question-view", {});
+                });
+            </script>
+
+
+
+
+            <!--编辑-->
+            <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <a th:href="@{'/publish/'+${question.id}}" class="community-menu"
+                   th:if="${session.user != null && session.user.id == question.creator}">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                    编辑
+                </a>
+            </div>
+
+
+            <!--回复-->
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <h4>
+                    <span th:text="${question.commentCount}"></span> 个回复
+                </h4>
+                <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12 comment-sp">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 comments" th:each="comment : ${comments}">
+
+
+
+                    <div class="media">
+                        <div class="media-left">
+                            <a href="#">
+                                <img class="media-object img-rounded"
+                                     th:src="${comment.user.headImg}">
+                            </a>
+                        </div>
+                        <div class="media-body" th:id="${'comment-body-'+comment.id}">
+                            <h5 class="media-heading">
+                                <span th:text="${comment.user.name}"></span>
+                            </h5>
+                            <div th:text="${comment.content}"></div>
+                            <div class="menu">
+                                <span th:data-id="${comment.id}"
+                                      onclick="like(this)" class="comment-icon" th:classappend="${comment.status==1 ? 'liked' : ''}">
+                                    <span class="glyphicon glyphicon-thumbs-up icon"></span>
+                                    <span th:text="${comment.likedCount}"></span>
+                                </span>
+                                <span th:data-id="${comment.id}" style="margin-left: 10px;"
+                                      onclick="collapseComments(this)" class="comment-icon">
+                                    <span class="glyphicon glyphicon-comment"></span>
+                                    <span th:text="${comment.commentCount}"></span>
+                                </span>
+                                <span class="pull-right"
+                                      th:text="${#dates.format(comment.gmtCreate,'yyyy-MM-dd HH:mm')}"></span>
+                            </div>
+                            <!--二级评论-->
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 collapse sub-comments"
+                                 th:id="${'comment-'+comment.id}">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <input type="text" class="form-control" placeholder="评论一下……"
+                                           th:id="${'input-'+comment.id}">
+                                    <button type="button" class="btn btn-success pull-right" onclick="comment(this)"
+                                            th:data-id="${comment.id}">评论
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--回复输入框-->
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <h4>
+                    提交回复
+                </h4>
+                <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12 comment-sp">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="comment_section">
+                    <div class="media">
+                        <div class="media-left">
+                            <a href="#">
+                                <img class="media-object img-rounded"
+                                     th:src="${session.user != null ? session.user.headImg : '/images/default-avatar.png'}">
+                            </a>
+                        </div>
+                        <div class="media-body">
+                            <h5 class="media-heading">
+                                <span th:text="${session.user != null ? session.user.name : '匿名用户'}"></span>
+                            </h5>
+                        </div>
+                    </div>
+                    <input type="hidden" id="question_id" th:value="${question.id}">
+                    <textarea class="form-control comment" rows="6" id="comment_content"></textarea>
+                    <button type="button" class="btn btn-success btn-comment" onclick="post()">我要回答</button>
+                </div>
+            </div>
+        </div>
+
+        <!--右侧布局-->
+        <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12" style="margin-left: 30px; margin-top: 10px;">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <h4>发起人</h4>
+                <div class="media">
+                    <div class="media-left">
+                        <a href="#">
+                            <img class="media-object img-rounded"
+                                 th:src="${question.user.headImg}">
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <h5 class="media-heading">
+                            <span th:text="${question.user.name}"></span>
+                        </h5>
+                    </div>
+                </div>
+            </div>
+
+<!-- 广告
+
+            <div>
+                &lt;!&ndash;二维码&ndash;&gt;
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 side">
+                    <h4>码问官方公众号</h4>
+                    <img class="img-thumbnail question-wechat" src="/images/official-account.png">
+                </div>
+                &lt;!&ndash;二维码&ndash;&gt;
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 side">
+                    <a href="http://gk.link/a/103Vl" target="_blank"
+                       onclick="gtag('event', 'click', {'event_category': 'LINK','event_label': 'GEEKTIME','transport_type': 'SIDE'})">
+                        <img class="img-thumbnail question-wechat" src="/images/geektime.jpeg">
+                    </a>
+                </div>
+                &lt;!&ndash;二维码&ndash;&gt;
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 side">
+                    <a href="https://gio.ren/w/nP2AqLRm" target="_blank"
+                       onclick="gtag('event', 'click', {'event_category': 'LINK','event_label': 'WONDERCR','transport_type': 'SIDE'})">
+                        <img class="img-thumbnail question-wechat" src="/images/wondercv.png">
+                    </a>
+                </div>
+            </div>
+
+-->
+
+
+
+            <!-- 相关问题 -->
+            <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <h3>你可能感兴趣的问题</h3>
+
+                <a th:each="related : ${relatedQuestions}" th:href="@{'/question/'+ ${related.id}}" th:text="${related.title}" class='btn btn-outline-success btn-sm' style="color: #333d53; display: block; text-align: left;max-width: 85%;overflow: hidden;text-overflow: ellipsis"></a>
+
+                <hr>
+                <!--<ul class="question-related list-group">-->
+                    <!--<li th:each="related : ${relatedQuestions}"  class="list-group-item">-->
+                        <!--<a th:href="@{'/question/'+ ${related.id}}" th:text="${related.title}"></a>-->
+                    <!--</li>-->
+                <!--</ul>-->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="myModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">温馨提示</h4>
+            </div>
+            <div class="modal-body">
+                <p id="error_msg">不能回复空内容~~~</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!--<div th:insert="~{footer :: foot}"></div>-->
+
+</body>
+<script>
+    !
+        function() {
+            function n(n, e, t) {
+                return n.getAttribute(e) || t
+            }
+            function e(n) {
+                return document.getElementsByTagName(n)
+            }
+            function t() {
+                var t = e("script"),
+                    o = t.length,
+                    i = t[o - 1];
+                return {
+                    l: o,
+                    z: n(i, "zIndex", -1),
+                    o: n(i, "opacity", .5),
+                    c: n(i, "color", "0,0,0"),
+                    n: n(i, "count", 99)
+                }
+            }
+            function o() {
+                a = m.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+                    c = m.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+            }
+            function i() {
+                r.clearRect(0, 0, a, c);
+                var n, e, t, o, m, l;
+                s.forEach(function(i, x) {
+                    for (i.x += i.xa, i.y += i.ya, i.xa *= i.x > a || i.x < 0 ? -1 : 1, i.ya *= i.y > c || i.y < 0 ? -1 : 1, r.fillRect(i.x - .5, i.y - .5, 1, 1), e = x + 1; e < u.length; e++) n = u[e],
+                    null !== n.x && null !== n.y && (o = i.x - n.x, m = i.y - n.y, l = o * o + m * m, l < n.max && (n === y && l >= n.max / 2 && (i.x -= .03 * o, i.y -= .03 * m), t = (n.max - l) / n.max, r.beginPath(), r.lineWidth = t / 2, r.strokeStyle = "rgba(" + d.c + "," + (t + .2) + ")", r.moveTo(i.x, i.y), r.lineTo(n.x, n.y), r.stroke()))
+                }),
+                    x(i)
+            }
+            var a, c, u, m = document.createElement("canvas"),
+                d = t(),
+                l = "c_n" + d.l,
+                r = m.getContext("2d"),
+                x = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+                    function(n) {
+                        window.setTimeout(n, 1e3 / 45)
+                    },
+                w = Math.random,
+                y = {
+                    x: null,
+                    y: null,
+                    max: 2e4
+                };
+            m.id = l,
+                m.style.cssText = "position:fixed;top:0;left:0;z-index:" + d.z + ";opacity:" + d.o,
+                e("body")[0].appendChild(m),
+                o(),
+                window.onresize = o,
+                window.onmousemove = function(n) {
+                    n = n || window.event,
+                        y.x = n.clientX,
+                        y.y = n.clientY
+                },
+                window.onmouseout = function() {
+                    y.x = null,
+                        y.y = null
+                };
+            for (var s = [], f = 0; d.n > f; f++) {
+                var h = w() * a,
+                    g = w() * c,
+                    v = 2 * w() - 1,
+                    p = 2 * w() - 1;
+                s.push({
+                    x: h,
+                    y: g,
+                    xa: v,
+                    ya: p,
+                    max: 6e3
+                })
+            }
+            u = s.concat([y]),
+                setTimeout(function() {
+                        i()
+                    },
+                    100)
+        } ();
+</script>
+<script>
+    function deleteReport(obj){
+        var id = $(obj).attr("btn_id");
+        $.ajax({
+            type : "GET",
+            url : "/admin/report/" + 2,
+            data : {
+                "questionId" : id
+            }
+        })
+        window.location.reload()
+    }
+
+    function addChoice(obj) {
+        var id = $(obj).attr("btn_id");
+        $.ajax({
+            type : "GET",
+            url : "/admin/question/" + id
+        })
+        window.location.reload()
+    }
+
+</script>
+</html>

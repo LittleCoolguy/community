@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:wb="http://open.weibo.com/wb">
+<head>
+    <meta charset="UTF-8">
+    <title>新生代农民工社区</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/community.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/css/editormd.min.css">
+    <link rel="stylesheet" href="/css/editormd.preview.min.css">
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/community.js"></script>
+
+    <script src="https://tjs.sjs.sinajs.cn/open/api/js/wb.js" type="text/javascript" charset="utf-8"></script>
+
+    <link href="css/bootsnav.css" rel="stylesheet">
+    <link href="css/color.css" rel="stylesheet">
+    <script src="js/bootsnav.js"></script>
+</head>
+<script type="application/javascript">
+    window.onload = function () {
+        var closable = window.localStorage.getItem("closable");
+        if (closable == "true") {
+            window.close();
+            window.localStorage.removeItem("closable");
+        }
+    }
+</script>
+<body>
+
+<div th:insert="~{navigation :: nav}"></div>
+
+<div class="container-fluid main" style="border-radius:10px; box-shadow:0px 0px 16px 5px #ccc; margin-top: 20px; ">
+    <div class="row">
+        <div class="col-lg-8 col-md-12 col-sm-12 col-xs-12" style="padding-left: 50px;">
+            <h2><span class="glyphicon glyphicon-list" aria-hidden="true"></span> 发现</h2>
+            <ol class="breadcrumb">
+                <li>当前标签</a></li>
+                <li th:if="${tag == null}">所有标签</li>
+                <li  th:text="${tag}">所有标签</a></li>
+
+            </ol>
+            <ul class="nav nav-tabs">
+                <li role="presentation" th:class="${sort == 'new' || sort == '' ? 'active':''}">
+                    <a href="/">最新</a>
+                </li>
+                <li role="presentation" th:class="${sort == 'hot30' ? 'active':''}">
+                    <a th:href="@{/(sort='hot30')}">月榜</a>
+                </li>
+                <li role="presentation" th:class="${sort == 'hot7' ? 'active':''}">
+                    <a th:href="@{/(sort='hot7')}">周榜</a>
+                </li>
+                <li role="presentation" th:class="${sort == 'hot' ? 'active':''}">
+                    <a th:href="@{/(sort='hot')}">最热</a>
+                </li>
+                <li role="presentation" th:class="${sort == 'choice' ? 'active':''}">
+                    <a th:href="@{/(sort='choice')}">精华</a>
+                </li>
+                <li role="presentation" th:class="${sort == 'no' ? 'active':''}">
+                    <a th:href="@{/(sort='no')}" class="red">消灭零回复</a>
+                </li>
+            </ul>
+<!--            //修改的地方-->
+            <div class="media" th:each="question : ${questions.list}">
+                <div class="media-left">
+                    <a href="#">
+                        <!--<img class="media-object img-rounded" th:src="${question.user.headImg}">-->
+                        <img class="media-object img-rounded" th:src="${question.headImg}">
+                    </a>
+                </div>
+                <div class="media-body" style="padding-left: 20px;">
+                    <h4 class="media-heading" >
+                        <a th:href="@{'question/'+${question.id}}" th:text="${question.title}" style="color: #333;"></a>
+                        <span th:if="${question.choice == 1}" style="background-color: red; color: #fff; font-size: .85714286rem; padding: 2px 4px; margin-left: 5px;" >精</span>
+
+                    </h4>
+                    <span class="text-desc"><span th:text="${question.commentCount}"></span> 个回复 • <span
+                            th:text="${question.viewCount}"></span> 次浏览 • <span
+                            th:text="${#dates.format(question.gmtCreate,'yyyy-MM-dd HH:mm')}"></span></span>
+                </div>
+                <!--<div class="media-right" th:if="${question.choice == 1}">-->
+                <!--<span style="background-color: red; color: #fff; font-size: .85714286rem; padding: 2px 4px; margin-left: 5px;">精</span>-->
+                <!--</div>-->
+            </div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <!--当前页数是否是首页，如果不是则出现首页标志-->
+                    <li th:if="${!questions.isFirstPage}">
+                        <a href="/" aria-label="Previous">
+                            <span aria-hidden="true">首页</span>
+                        </a>
+                    </li>
+                    <!--当前页数是否还有上一页，如果不是则出现上一页标志-->
+                    <li th:if="${questions.hasPreviousPage}">
+                        <a th:href="@{/(page=${questions.pageNum - 1},search=${search},tag=${tag},sort=${sort})}" aria-label="Previous">
+                            <span aria-hidden="true">&lt;</span>
+                        </a>
+                    </li>
+
+                    <!--循环展示页数-->
+                    <li th:each="navigatepageNum : ${questions.navigatepageNums}" th:class="${navigatepageNum == questions.pageNum} ? 'active' : ''">
+                        <a th:text="${navigatepageNum}"
+                           th:href="@{/(page=${navigatepageNum},search=${search},tag=${tag},sort=${sort})}">
+                        </a>
+                    </li>
+
+                    <!--当前页数是否还有下一页，如果不是则出现下一页标志-->
+                    <li th:if="${questions.hasNextPage}">
+                        <a th:href="@{/(page=${questions.pageNum + 1},search=${search},tag=${tag},sort=${sort})}" aria-label="Next">
+                            <span aria-hidden="true">&gt;</span>
+                        </a>
+                    </li>
+                    <!--当前页数是否是尾页，如果不是则出现尾页标志-->
+                    <li th:if="${!questions.isLastPage}">
+                        <a aria-label="Previous" th:href="@{/(page=${questions.pages},search=${search},tag=${tag},sort=${sort})}">
+                            <span aria-hidden="true">尾页</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12" style="margin-left: 80px; margin-top: 30px;">
+
+
+            <div>
+                <!--二维码-->
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 sidex">
+                    <h4>支持高冷小伙，发个888吧～</h4>
+                    <hr>
+                    <img class="img-thumbnail question-wechat" src="/images/qrcode.jpg">
+                    <hr>
+                </div>
+                <!--二维码-->
+                <!--<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 side">-->
+                <!--<img class="img-thumbnail question-wechat" src="https://avatars2.githubusercontent.com/u/49060515?v=4">-->
+                <!--</div>-->
+                <!--二维码-->
+                <!--<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 side">-->
+                <!--<img class="img-thumbnail question-wechat" src="/images/default-avatar.png">-->
+                <!--</div>-->
+            </div>
+
+
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 sidex" >
+                <h4>🔥热门标签</h4>
+                <a th:each="tag : ${session.tags}" th:href="@{/(tag=${tag})}" th:text="${tag}" class="community-tag" style="color: #ebebeb;"></a>
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 sidex">
+                <hr>
+                <h4>友情链接</h4>
+                <hr>
+                <a href="https://github.com/LittleCoolguy" target="_blank" style="text-decoration: none; color: #777; display: block; margin: 0px;">GitHub账号</a>
+                <br>
+                <a href="https://i.csdn.net/#/user-center/profile?spm=1000.2115.3001.5111" target="_blank" style="text-decoration: none; color: #777; display: block; margin: 0px;">CSDN主页</a>
+<!--                <br>-->
+<!--                关注作者新浪微博:<wb:follow-button uid="5157063963" type="red_1" width="240" height="24"></wb:follow-button>-->
+            </div>
+        </div>
+    </div>
+</div>
+<div th:insert="~{footer :: foot}" style="margin-bottom: 0px;"></div>
+</body>
+
+
+<script>
+    !
+        function() {
+            function n(n, e, t) {
+                return n.getAttribute(e) || t
+            }
+            function e(n) {
+                return document.getElementsByTagName(n)
+            }
+            function t() {
+                var t = e("script"),
+                    o = t.length,
+                    i = t[o - 1];
+                return {
+                    l: o,
+                    z: n(i, "zIndex", -1),
+                    o: n(i, "opacity", .5),
+                    c: n(i, "color", "0,0,0"),
+                    n: n(i, "count", 99)
+                }
+            }
+            function o() {
+                a = m.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+                    c = m.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+            }
+            function i() {
+                r.clearRect(0, 0, a, c);
+                var n, e, t, o, m, l;
+                s.forEach(function(i, x) {
+                    for (i.x += i.xa, i.y += i.ya, i.xa *= i.x > a || i.x < 0 ? -1 : 1, i.ya *= i.y > c || i.y < 0 ? -1 : 1, r.fillRect(i.x - .5, i.y - .5, 1, 1), e = x + 1; e < u.length; e++) n = u[e],
+                    null !== n.x && null !== n.y && (o = i.x - n.x, m = i.y - n.y, l = o * o + m * m, l < n.max && (n === y && l >= n.max / 2 && (i.x -= .03 * o, i.y -= .03 * m), t = (n.max - l) / n.max, r.beginPath(), r.lineWidth = t / 2, r.strokeStyle = "rgba(" + d.c + "," + (t + .2) + ")", r.moveTo(i.x, i.y), r.lineTo(n.x, n.y), r.stroke()))
+                }),
+                    x(i)
+            }
+            var a, c, u, m = document.createElement("canvas"),
+                d = t(),
+                l = "c_n" + d.l,
+                r = m.getContext("2d"),
+                x = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+                    function(n) {
+                        window.setTimeout(n, 1e3 / 45)
+                    },
+                w = Math.random,
+                y = {
+                    x: null,
+                    y: null,
+                    max: 2e4
+                };
+            m.id = l,
+                m.style.cssText = "position:fixed;top:0;left:0;z-index:" + d.z + ";opacity:" + d.o,
+                e("body")[0].appendChild(m),
+                o(),
+                window.onresize = o,
+                window.onmousemove = function(n) {
+                    n = n || window.event,
+                        y.x = n.clientX,
+                        y.y = n.clientY
+                },
+                window.onmouseout = function() {
+                    y.x = null,
+                        y.y = null
+                };
+            for (var s = [], f = 0; d.n > f; f++) {
+                var h = w() * a,
+                    g = w() * c,
+                    v = 2 * w() - 1,
+                    p = 2 * w() - 1;
+                s.push({
+                    x: h,
+                    y: g,
+                    xa: v,
+                    ya: p,
+                    max: 6e3
+                })
+            }
+            u = s.concat([y]),
+                setTimeout(function() {
+                        i()
+                    },
+                    100)
+        } ();
+</script>
+</html>
